@@ -7,6 +7,7 @@ using PortAudioSharp;
 using SmartRecorder;
 using static SmartRecorder.Configuration;
 using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 
 namespace SmartRecorder
@@ -17,7 +18,7 @@ namespace SmartRecorder
         static void Main(string[] args)
         {
             var deviceActions = new DeviceActions();
-            deviceActions.InitSession();
+            deviceActions.SessionInit();
             int selection;
             do
             {

@@ -22,5 +22,125 @@ namespace SmartRecorder {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RefreshToken {
+            get {
+                return ((string)(this["RefreshToken"]));
+            }
+            set {
+                this["RefreshToken"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AccessToken {
+            get {
+                return ((string)(this["AccessToken"]));
+            }
+            set {
+                this["AccessToken"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Uid {
+            get {
+                return ((string)(this["Uid"]));
+            }
+            set {
+                this["Uid"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("DeLongpre")]
+        public string SSID {
+            get {
+                return ((string)(this["SSID"]));
+            }
+            set {
+                this["SSID"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("snax1234")]
+        public string SSIDpw {
+            get {
+                return ((string)(this["SSIDpw"]));
+            }
+            set {
+                this["SSIDpw"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DbCode {
+            get {
+                return ((string)(this["DbCode"]));
+            }
+            set {
+                this["DbCode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("k8qle0tzgfj8p8i")]
+        public string DbApiKey {
+            get {
+                return ((string)(this["DbApiKey"]));
+            }
+            set {
+                this["DbApiKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("d529hyzcpn0afpi")]
+        public string DbApiSecret {
+            get {
+                return ((string)(this["DbApiSecret"]));
+            }
+            set {
+                this["DbApiSecret"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("48000")]
+        public int SampleRate {
+            get {
+                return ((int)(this["SampleRate"]));
+            }
+            set {
+                this["SampleRate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SelectedAudioDevice {
+            get {
+                return ((int)(this["SelectedAudioDevice"]));
+            }
+            set {
+                this["SelectedAudioDevice"] = value;
+            }
+        }
     }
 }

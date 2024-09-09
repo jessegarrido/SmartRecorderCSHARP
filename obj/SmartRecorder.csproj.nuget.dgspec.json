@@ -53,9 +53,29 @@
               "target": "Package",
               "version": "[7.0.0, )"
             },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Net.Http": {
+              "target": "Package",
+              "version": "[2.2.29, )"
+            },
+            "NAudio": {
+              "target": "Package",
+              "version": "[2.2.1, )"
+            },
+            "NAudio.Lame.CrossPlatform.Jw": {
+              "target": "Package",
+              "version": "[2.2.2, )"
+            },
             "PortAudioSharp2": {
               "target": "Package",
               "version": "[1.0.4, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[112.0.0, )"
             },
             "System.Configuration.ConfigurationManager": {
               "target": "Package",
@@ -64,6 +84,10 @@
             "System.Net.Http": {
               "target": "Package",
               "version": "[4.3.4, )"
+            },
+            "System.Net.Requests": {
+              "target": "Package",
+              "version": "[4.3.0, )"
             }
           },
           "imports": [

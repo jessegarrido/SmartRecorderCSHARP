@@ -1,20 +1,13 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.Net;
 using System.Net.NetworkInformation;
 using PortAudioSharp;
-using System.IO;
-using static SmartRecorder.Program;
-using System.Runtime.CompilerServices;
-using static System.Net.Mime.MediaTypeNames;
 using static SmartRecorder.Configuration;
-using Dropbox.Api;
-using System.Configuration;
+using NAudio.Wave;
+using NAudio.Lame;
+using OauthPKCE;
+using Microsoft.Extensions.Configuration;
+
 
 namespace SmartRecorder
 {
@@ -25,6 +18,28 @@ namespace SmartRecorder
         public DeviceActions()
         {
         }
+
+        [DllImport("kernel32.dll")]
+        static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
+
+        [DllImport("kernel32.dll")]
+        static extern bool GetConsoleMode(IntPtr hConsoleHandle, out int mode);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetStdHandle(int handle);
+
+        const int STD_INPUT_HANDLE = -10;
+        const int ENABLE_QUICK_EDIT_MODE = 0x40 | 0x80;
+
+        public static void EnableQuickEditMode()
+        {
+            int mode;
+            IntPtr handle = GetStdHandle(STD_INPUT_HANDLE);
+            GetConsoleMode(handle, out mode);
+            mode |= ENABLE_QUICK_EDIT_MODE;
+            SetConsoleMode(handle, mode);
+        }
+
         public void AudioDeviceInitAndEnumerate()
         {
             PortAudio.LoadNativeLibrary();
@@ -46,7 +61,7 @@ namespace SmartRecorder
         public int ReturnAudioDevice(int? configSelectedIndex)
         {
             int deviceIndex;
-            deviceIndex = configSelectedIndex == null ? PortAudio.DefaultInputDevice : Global.SelectedDevice;
+            deviceIndex = configSelectedIndex == null ? PortAudio.DefaultInputDevice : Config.SelectedAudioDevice;
 
             if (deviceIndex == PortAudio.NoDevice)
             {
@@ -56,7 +71,7 @@ namespace SmartRecorder
             DeviceInfo info = PortAudio.GetDeviceInfo(deviceIndex);
             Console.WriteLine();
             Console.WriteLine($"Use default device {deviceIndex} ({info.name})");
-            Global.SelectedDevice = deviceIndex;
+            Config.SelectedAudioDevice = deviceIndex;
             return deviceIndex;
 
 
@@ -103,6 +118,12 @@ namespace SmartRecorder
                     if (Global.MyState == 2)
                     {
                         Global.MyState = 1;
+                        WavToMP3(Global.wavPathAndName, Global.mp3PathAndName);
+                        DropBox db = new DropBox();
+                        //db.DBAuth();
+                        db.DBPush();
+                        //ListRootFolder();
+                        //PushMp3ToCloud();
                     }
                     else
                     {
@@ -123,16 +144,18 @@ namespace SmartRecorder
             }
             return -1;
         }
-        public void InitSession()
+        public void SessionInit()
         {
+            Console.WriteLine("Welcome to PortaSmart");
+            LoadConfig();
             Global.OS = GetOS();
-            Global.wavPathAndName = CreateNewFileAndLocation();
+            CreateNewLocalFileAndLocation();
             Global.NetworkStatus = CheckNetwork();
 
-            Console.WriteLine("Launching Pi Smart Recorder");
-            Console.WriteLine(Global.OS);
-            Console.WriteLine(Global.SessionName);
-            Console.WriteLine(Global.Home);
+
+            Console.WriteLine($"Operating System: {Global.OS}");
+            Console.WriteLine($"Session Name: {Global.SessionName}");
+            Console.WriteLine($"User's Home Folder: {Global.Home}");
             //TODO setup GPIO
             //TODO mount usb drives
             //TODO blink the leds
@@ -140,11 +163,12 @@ namespace SmartRecorder
             CheckNetwork();
             //TODO fix network if absent / setup background check
             AudioDeviceInitAndEnumerate();
-            ReturnAudioDevice(Global.SelectedDevice);
+            ReturnAudioDevice(Config.SelectedAudioDevice);
             ThumbDrives();
             //CloudAuth();
-
-            ListCloudContents();
+            //DropBoxPlugin db = new();
+            //db.AuthorizeDropBox();
+            //ListCloudContents();
 
 
             Global.MyState = 1;
@@ -152,7 +176,7 @@ namespace SmartRecorder
         public bool CheckNetwork()
         {
             Global.NetworkStatus = NetworkInterface.GetIsNetworkAvailable();
-            Console.WriteLine($"Network Status: {Global.NetworkStatus}");
+            Console.WriteLine($"Network Connected Status: {Global.NetworkStatus}");
             //set network status LED
             return Global.NetworkStatus;
         }
@@ -189,23 +213,30 @@ namespace SmartRecorder
             return s;
         }
 
-        string CreateNewFileAndLocation()
+        void CreateNewLocalFileAndLocation()
         {
-            string newPath = Path.Combine(Global.RecordingsFolder, Global.SessionName);
-            if (Directory.Exists(newPath))
+            string newWavPath = Path.Combine(Global.LocalRecordingsFolder, Global.SessionName);
+            string newMp3Path = Path.Combine(newWavPath, "mp3");
+            List<string> songfilepaths = new List<string> { newWavPath, newMp3Path };
+            foreach (string path in songfilepaths)
             {
-                Console.WriteLine("Path exists");
+                if (Directory.Exists(path))
+                {
+                    Console.WriteLine($"Path {path} exists");
+                }
+                else
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(path);
+                    Console.WriteLine($"The directory {path} was created successfully at {0}.", Directory.GetCreationTime(Global.LocalRecordingsFolder));
+                }
             }
-            else
-            {
-                DirectoryInfo di = Directory.CreateDirectory(newPath);
-                Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(Global.RecordingsFolder));
-            }
-            int take = Directory.GetFiles(Path.GetDirectoryName(newPath), "*", SearchOption.AllDirectories).Length + 1;
-            string wavPathAndName = Path.Combine(newPath, $"{Global.SessionName}_take-{take}.wav");
-            Console.WriteLine(wavPathAndName);
-            Global.wavPathAndName = wavPathAndName;
-            return wavPathAndName;
+            int wavCount = Directory.GetFiles(Path.GetDirectoryName(newWavPath), "*", SearchOption.TopDirectoryOnly).Length;
+            int mp3Count = Directory.GetFiles(Path.GetDirectoryName(newMp3Path), "*", SearchOption.TopDirectoryOnly).Length;
+            int take = Math.Max(wavCount, mp3Count) + 1;
+            Global.wavPathAndName = Path.Combine(newWavPath, $"{Global.SessionName}_take-{take}.wav");
+            Global.mp3PathAndName = Path.Combine(newWavPath, "mp3", $"{Global.SessionName}_take-{take}.mp3");
+
+            //  return wavPathAndName;
         }
         public void RecordAudio()
         {
@@ -213,58 +244,81 @@ namespace SmartRecorder
 
             StreamParameters param = SetAudioParameters();
 
-            CreateNewFileAndLocation(); // writes to Global
+            CreateNewLocalFileAndLocation(); // writes to Global
 
-            DeviceInfo info = PortAudio.GetDeviceInfo(Global.SelectedDevice);
+            DeviceInfo info = PortAudio.GetDeviceInfo(Config.SelectedAudioDevice);
             Console.WriteLine();
-            Console.WriteLine($"Use default device {Global.SelectedDevice} ({info.name})");
+            Console.WriteLine($"Use default device {Config.SelectedAudioDevice} ({info.name})");
             int numChannels = param.channelCount;
 
             //FileStream f = new FileStream(wavPathAndName, FileMode.Create);
-            Float32WavWriter wr = new Float32WavWriter(Global.wavPathAndName, Global.SampleRate, numChannels);
-            //MemoryStream ms = new MemoryStream();
-
-            PortAudioSharp.Stream.Callback callback = (nint input, nint output,
-                uint frameCount,
-                ref StreamCallbackTimeInfo timeInfo,
-                StreamCallbackFlags statusFlags,
-                nint userData
-                ) =>
+            using (Float32WavWriter wr = new Float32WavWriter(Global.wavPathAndName, Config.SampleRate, numChannels))
             {
-                frameCount = frameCount * (uint)numChannels;
-                float[] samples = new float[frameCount];
-                Marshal.Copy(input, samples, 0, (int)frameCount);
-                wr.WriteSamples(samples);
-                return StreamCallbackResult.Continue;
-            };
+                PortAudioSharp.Stream.Callback callback = (nint input, nint output,
+                    uint frameCount,
+                    ref StreamCallbackTimeInfo timeInfo,
+                    StreamCallbackFlags statusFlags,
+                    nint userData
+                    ) =>
+                {
+                    frameCount = frameCount * (uint)numChannels;
+                    float[] samples = new float[frameCount];
+                    Marshal.Copy(input, samples, 0, (int)frameCount);
+                    wr.WriteSamples(samples);
+                    return StreamCallbackResult.Continue;
+                };
 
-            PortAudioSharp.Stream stream = new PortAudioSharp.Stream(inParams: param, outParams: null, sampleRate: Global.SampleRate,
-                framesPerBuffer: 0,
-                streamFlags: StreamFlags.ClipOff,
-                callback: callback,
-                userData: nint.Zero
-                );
+                Console.WriteLine(param);
+                Console.WriteLine(Config.SampleRate);
+                Console.WriteLine("Now Recording");
 
-            Console.WriteLine(param);
-            Console.WriteLine(Global.SampleRate);
-            Console.WriteLine("Now Recording");
-
-            // int? stoprecording = null;
-            Global.MyState = 2;
-            stream.Start();
-            do
-            {
-                Thread.Sleep(200);
-                // stoprecording = GetValidatedSelection(new List<int> { 0,1 });
-            } while (Global.MyState == 2);
-            stream.Stop();
-            Console.Write("Recording Stopped.");
-            // Thread.Sleep(200);
+                Global.MyState = 2;
+                PortAudioSharp.Stream stream = new PortAudioSharp.Stream(inParams: param, outParams: null, sampleRate: Config.SampleRate,
+                    framesPerBuffer: 0,
+                    streamFlags: StreamFlags.ClipOff,
+                    callback: callback,
+                    userData: nint.Zero
+                    );
+                {
+                    stream.Start();
+                    do
+                    {
+                        Thread.Sleep(200);
+                    } while (Global.MyState == 2);
+                    stream.Stop();
+                    Console.WriteLine("Recording Stopped.");
+                };
+            }
         }
-        void StopRecording()
+        // Convert WAV to MP3 using libmp3lame library
+        public static void WavToMP3(string waveFileName, string mp3FileName, int bitRate = 192)
+        {
+            Console.WriteLine($"Converting {Global.wavPathAndName} to mp3 file");
+            LoadLameDLL();
+            Thread.Sleep(1000);
+            using (var reader = new AudioFileReader(waveFileName))
+            using (var writer = new LameMP3FileWriter(mp3FileName, reader.WaveFormat, bitRate))
+                reader.CopyTo(writer);
+            Console.WriteLine($"{Global.mp3PathAndName} was created.");
+        }
+        public static void LoadLameDLL()
+        {
+            LameDLL.LoadNativeDLL(Path.Combine(AppDomain.CurrentDomain.BaseDirectory));
+        }
+        async void ListCloudContents()
         {
 
         }
+
+        /// <summary>
+        /// Uploads a big file in chunk. The is very helpful for uploading large file in slow network condition
+        /// and also enable capability to track upload progerss.
+        /// </summary>
+        /// <param name="client">The Dropbox client.</param>
+        /// <param name="folder">The folder to upload the file.</param>
+        /// <param name="fileName">The name of the file.</param>
+        /// <returns></returns>
+
         void SetStartPlayback()
         {
         }
@@ -290,29 +344,9 @@ namespace SmartRecorder
         }
         void CloudAuth()
         {
-            static async Task Run()
-            {
 
-            }
         }
-        void ListCloudContents()
-        {
-            async Task ListRootFolder(DropboxClient dbx)
-            {
-                var list = await dbx.Files.ListFolderAsync(string.Empty);
 
-                // show folders then files
-                foreach (var item in list.Entries.Where(i => i.IsFolder))
-                {
-                    Console.WriteLine("D  {0}/", item.Name);
-                }
-
-                foreach (var item in list.Entries.Where(i => i.IsFile))
-                {
-                    Console.WriteLine("F{0,8} {1}", item.AsFile.Size, item.Name);
-                }
-            }
-        }
 
         string GetOS()
         {
@@ -369,12 +403,23 @@ namespace SmartRecorder
             } while (!validOptions.Contains(validSelection ?? -1));
             return validSelection ?? -1;
         }
+
+        public void LoadConfig()
+        { 
+            Config.DbApiKey = Settings.Default.DbApiKey;
+            Config.DbApiSecret = Settings.Default.DbApiSecret;
+            Config.SSID = Settings.Default.SSID;
+            Config.SSIDpw = Settings.Default.SSIDpw;
+            Config.DbCode = Settings.Default.DbCode;
+            Config.SelectedAudioDevice = Settings.Default.SelectedAudioDevice;
+            Config.SampleRate = Settings.Default.SampleRate;
+        }
     }
+
     public class DeviceItems()
     {
         void PanelLEDs()
         {
-
         }
         void PanelButtons()
         {
@@ -398,3 +443,4 @@ namespace SmartRecorder
         }
     }
 }
+
