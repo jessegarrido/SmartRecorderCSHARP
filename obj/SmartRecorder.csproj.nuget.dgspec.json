@@ -57,9 +57,21 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "Microsoft.Extensions.FileProviders.Physical": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.Net.Http": {
               "target": "Package",
               "version": "[2.2.29, )"
+            },
+            "Microsoft.Windows.Compatibility": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "MyOddWeb.DirectoryWatcher": {
+              "target": "Package",
+              "version": "[0.1.9, )"
             },
             "NAudio": {
               "target": "Package",
@@ -77,7 +89,23 @@
               "target": "Package",
               "version": "[112.0.0, )"
             },
+            "SimpleWifi.netstandard.Lsh": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
             "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "System.IO": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.IO.FileSystem.DriveInfo": {
+              "target": "Package",
+              "version": "[4.3.1, )"
+            },
+            "System.Management": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
@@ -88,6 +116,18 @@
             "System.Net.Requests": {
               "target": "Package",
               "version": "[4.3.0, )"
+            },
+            "Unosquare.Raspberry.IO": {
+              "target": "Package",
+              "version": "[0.27.1, )"
+            },
+            "Usb.Events": {
+              "target": "Package",
+              "version": "[11.1.0.1, )"
+            },
+            "managedwifi": {
+              "target": "Package",
+              "version": "[1.1.0, )"
             }
           },
           "imports": [

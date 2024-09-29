@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmartRecorder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ab9fb1711e3de5b2a6fd11a82fb6617cb55049d")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartRecorder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartRecorder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

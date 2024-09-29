@@ -1,16 +1,4 @@
-﻿
-using System.Threading;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System;
-using PortAudioSharp;
-using SmartRecorder;
-using static SmartRecorder.Configuration;
-using System.Configuration;
-using Microsoft.Extensions.Configuration;
-
-
-namespace SmartRecorder
+﻿namespace SmartRecorder
 {
     internal class Program
     {

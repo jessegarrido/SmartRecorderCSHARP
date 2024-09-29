@@ -23,22 +23,25 @@ namespace SmartRecorder
         public static int recordButtonPinAddress { get; set; } = 1;
         public static int playButtonPinAddress { get; set; } = 2;
         public static int networkLEDPinAddress { get; set; } = 3;
-        public static bool enumerateDevicesAtBoot { get; set; } = false;
+        public static string? RemovableDrivePath { get; set; } 
+        public static int RemovableDriveCount { get; set; } = 0;
+        public static string DropBoxCodeDotTxtContains { get; set; }
+        // public static int Takes { get; set; }
+        // public static DateOnly LastTakeDate { get; set; }
         public static List<FileInfo> FilesInDirectory { get; set; } = new DirectoryInfo(LocalRecordingsFolder).GetFiles()
                                                                       .OrderBy(f => f.LastWriteTime)
                                                                      .ToList();
-        public static DropboxClientConfig dbConfig { get; set; }
+     //   public static DropboxClientConfig dbConfig { get; set; }
     }
-        public  class Config
-        {
-         //load from App.config
-        public static string SSID { get; set; }
-        public static string SSIDpw { get; set; }
-        public static string DbCode { get; set; }
-        public static string DbApiKey { get; set; } 
-        public static string DbApiSecret { get; set; } 
-        public static int SampleRate { get; set; }
-        public static int SelectedAudioDevice { get; set; }
-
+    public class Config
+    {
+        //load from App.config
+       public static string SSID { get; set; }
+       public static string SSIDpw { get; set; }
+       public static string DbCode { get; set; }
+       public static string DbApiKey { get; set; } 
+       public static string DbApiSecret { get; set; } 
+       public static int SampleRate { get; set; }
+       public static int SelectedAudioDevice { get; set; }
     }
 }
